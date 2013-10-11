@@ -36,14 +36,21 @@ module.exports = function(grunt){
     var nowrite = grunt.option('no-write');
     var task = this;
 
-    if (options.bump) bump(config);
-    if (options.add) add(config);
-    if (options.commit) commit(config);
-    if (options.tag) tag(config);
-    if (options.push) push();
-    if (options.pushTags) pushTags(config);
-    if (options.npm) publish(config);
-    if (options.github) githubRelease(config);
+    var steps = [];
+    if (options.bump) steps.push(bump);
+    if (options.add) steps.push(add);
+    if (options.commit) steps.push(commit);
+    if (options.tag) steps.push(tag);
+    if (options.push) steps.push(push);
+    if (options.pushTags) steps.push(pushTags);
+    if (options.npm) steps.push(publish);
+    if (options.github) steps.push(githubRelease);
+
+    for (var step = 0; step < steps.length; step++){
+      if (!steps[step](config)) {
+        break;
+      }
+    }
 
     function setup(file, type){
       var pkg = grunt.file.readJSON(file);
@@ -55,23 +62,23 @@ module.exports = function(grunt){
     }
 
     function add(config){
-      run('git add ' + config.file);
+      return run('git add ' + config.file);
     }
 
     function commit(config){
-      run('git commit '+ config.file +' -m "'+ commitMessage +'"', config.file + ' committed');
+      return run('git commit '+ config.file +' -m "'+ commitMessage +'"', config.file + ' committed');
     }
 
     function tag(config){
-      run('git tag ' + tagName + ' -m "'+ tagMessage +'"', 'New git tag created: ' + tagName);
+      return run('git tag ' + tagName + ' -m "'+ tagMessage +'"', 'New git tag created: ' + tagName);
     }
 
-    function push(){
-      run('git push', 'pushed to remote');
+    function push(config){
+      return run('git push', 'pushed to remote');
     }
 
     function pushTags(config){
-      run('git push --tags', 'pushed new tag '+ config.newVersion +' to remote');
+      return run('git push --tags', 'pushed new tag '+ config.newVersion +' to remote');
     }
 
     function publish(config){
@@ -83,7 +90,7 @@ module.exports = function(grunt){
         msg += ' with a tag of "' + npmtag + '"';
       }
       if (options.folder){ cmd += ' ' + options.folder }
-      run(cmd, msg);
+      return run(cmd, msg);
     }
 
     function getNpmTag(){
@@ -93,21 +100,31 @@ module.exports = function(grunt){
     }
 
     function run(cmd, msg){
+      var success;
       if (nowrite) {
         grunt.verbose.writeln('Not actually running: ' + cmd);
+        success = true;
       }
       else {
         grunt.verbose.writeln('Running: ' + cmd);
-        shell.exec(cmd, {silent:true});
+        success = (shell.exec(cmd, {silent:true}).code === 0);
       }
 
-      if (msg) grunt.log.ok(msg);
+      msg = msg || cmd;
+      if (success){
+        grunt.log.ok(msg);
+      }
+      else {
+        grunt.fail.warn(msg + ' failed');
+      }
+      return success;
     }
 
     function bump(config){
       config.pkg.version = config.newVersion;
       grunt.file.write(config.file, JSON.stringify(config.pkg, null, '  ') + '\n');
       grunt.log.ok('Version bumped to ' + config.newVersion);
+      return true;
     }
 
     function githubRelease(){
