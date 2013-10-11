@@ -8,6 +8,7 @@
 
 var shell = require('shelljs');
 var semver = require('semver');
+var path = require('path');
 
 module.exports = function(grunt){
   grunt.registerTask('release', 'bump version, git tag, git push, npm publish', function(type){
@@ -89,7 +90,10 @@ module.exports = function(grunt){
         cmd += ' --tag ' + npmtag;
         msg += ' with a tag of "' + npmtag + '"';
       }
-      if (options.folder){ cmd += ' ' + options.folder }
+      if (options.folder){
+        cmd += ' ' + options.folder;
+        grunt.file.copy(config.file, path.join(options.folder, path.basename(config.file)));
+      }
       return run(cmd, msg);
     }
 
