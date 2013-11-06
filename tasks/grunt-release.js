@@ -72,7 +72,7 @@ module.exports = function(grunt){
     }
 
     function pushTags(config){
-      run('git push --tags', 'pushed new tag '+ config.newVersion +' to remote');
+      run('git push ' + config.remote + ' ' + tagName, 'pushed new tag '+ config.newVersion +' to remote');
     }
 
     function publish(config){
