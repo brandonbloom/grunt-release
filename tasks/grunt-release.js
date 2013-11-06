@@ -21,7 +21,8 @@ module.exports = function(grunt){
       tag: true,
       push: true,
       pushTags: true,
-      npm : true
+      npm : true,
+      remote: "origin"
     });
 
     var config = setup(options.file, type);
@@ -67,7 +68,7 @@ module.exports = function(grunt){
     }
 
     function push(){
-      run('git push', 'pushed to remote');
+      run('git push ' + config.remote + ' HEAD', 'pushed to remote');
     }
 
     function pushTags(config){
