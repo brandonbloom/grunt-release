@@ -82,13 +82,13 @@ module.exports = function(grunt){
         cmd += ' --tag ' + npmtag;
         msg += ' with a tag of "' + npmtag + '"';
       }
-      if (options.folder){ cmd += ' ' + options.folder }
+      if (options.folder){ cmd += ' ' + options.folder; }
       run(cmd, msg);
     }
 
     function getNpmTag(){
       var tag = grunt.option('npmtag') || options.npmtag;
-      if(tag === true) { tag = config.newVersion }
+      if(tag === true) { tag = config.newVersion; }
       return tag;
     }
 
