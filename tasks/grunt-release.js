@@ -12,7 +12,7 @@ var path = require('path');
 
 module.exports = function(grunt){
   grunt.registerTask('release', 'bump version, git tag, git push, npm publish', function(type){
-    
+
     //defaults
     var options = this.options({
       bump: true,
@@ -22,7 +22,8 @@ module.exports = function(grunt){
       tag: true,
       push: true,
       pushTags: true,
-      npm : true
+      npm : true,
+      remote: "origin"
     });
 
     var config = setup(options.file, type);
@@ -74,23 +75,23 @@ module.exports = function(grunt){
       return run('git tag ' + tagName + ' -m "'+ tagMessage +'"', 'New git tag created: ' + tagName);
     }
 
-    function push(config){
-      return run('git push', 'pushed to remote');
+    function push(){
+      return run('git push ' + config.remote + ' HEAD', 'pushed to remote');
     }
 
     function pushTags(config){
-      return run('git push --tags', 'pushed new tag '+ config.newVersion +' to remote');
+      return run('git push ' + config.remote + ' ' + tagName, 'pushed new tag '+ config.newVersion +' to remote');
     }
 
     function publish(config){
       var cmd = 'npm publish';
       var msg = 'published '+ config.newVersion +' to npm';
       var npmtag = getNpmTag();
-      if (npmtag){ 
+      if (npmtag){
         cmd += ' --tag ' + npmtag;
         msg += ' with a tag of "' + npmtag + '"';
       }
-      if (options.folder){
+      if (options.folder) {
         cmd += ' ' + options.folder;
         grunt.file.copy(config.file, path.join(options.folder, path.basename(config.file)));
       }
@@ -99,7 +100,7 @@ module.exports = function(grunt){
 
     function getNpmTag(){
       var tag = grunt.option('npmtag') || options.npmtag;
-      if(tag === true) { tag = config.newVersion }
+      if(tag === true) { tag = config.newVersion; }
       return tag;
     }
 
@@ -148,7 +149,7 @@ module.exports = function(grunt){
         .end(function(res){
           if (res.statusCode === 201){
             success();
-          } 
+          }
           else {
             grunt.fail.warn('Error creating github release. Response: ' + res.text);
           }
