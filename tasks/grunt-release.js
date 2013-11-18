@@ -75,7 +75,7 @@ module.exports = function(grunt){
       return run('git tag ' + tagName + ' -m "'+ tagMessage +'"', 'New git tag created: ' + tagName);
     }
 
-    function push(){
+    function push(config){
       return run('git push ' + config.remote + ' HEAD', 'pushed to remote');
     }
 
