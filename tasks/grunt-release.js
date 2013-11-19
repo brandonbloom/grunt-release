@@ -76,11 +76,11 @@ module.exports = function(grunt){
     }
 
     function push(config){
-      return run('git push ' + config.remote + ' HEAD', 'pushed to remote');
+      return run('git push ' + options.remote + ' master', 'pushed to remote');
     }
 
     function pushTags(config){
-      return run('git push ' + config.remote + ' ' + tagName, 'pushed new tag '+ config.newVersion +' to remote');
+      return run('git push ' + options.remote + ' ' + tagName, 'pushed new tag '+ config.newVersion +' to remote');
     }
 
     function publish(config){
